@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use LaraCrypt\Engine\Console\ObfuscateCommand;
+use Symfony\Component\Console\Application;
+
+$autoloaders = [
+    __DIR__ . '/../vendor/autoload.php',   // standalone install
+    __DIR__ . '/../../../autoload.php',    // installed as a dependency
+];
+
+$loaded = false;
+foreach ($autoloaders as $file) {
+    if (is_file($file)) {
+        require $file;
+        $loaded = true;
+        break;
+    }
+}
+
+if (! $loaded) {
+    fwrite(STDERR, "LaraCrypt: could not locate the Composer autoloader. Run `composer install`.\n");
+    exit(1);
+}
+
+$application = new Application('LaraCrypt', '0.1.0');
+$command = new ObfuscateCommand();
+$application->add($command);
+$application->setDefaultCommand((string) $command->getName(), true);
+
+exit($application->run());
